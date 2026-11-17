@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Casa al día · Limpieza del hogar</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f7d5b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f3; --card:#ffffff; --ink:#1d2a24; --muted:#6b7a72; --line:#e3e8e4;
+  --accent:#2f7d5b; --accent-soft:#e3f1ea; --accent-ink:#ffffff;
+  --red:#c8463b; --red-soft:#fbe8e6; --amber:#b7791f; --amber-soft:#fcf1dc;
+  --green:#2f7d5b; --green-soft:#e3f1ea; --gray-soft:#eef1ef;
+  --radius:16px; --shadow:0 1px 2px rgba(20,40,30,.06),0 4px 14px rgba(20,40,30,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#121815; --card:#1b2420; --ink:#e7eee9; --muted:#93a39a; --line:#2a3631;
+    --accent:#5cc196; --accent-soft:#1f3a2e; --accent-ink:#0d1a14;
+    --red:#ff7b6e; --red-soft:#3a201d; --amber:#f0b45a; --amber-soft:#382c17;
+    --green:#5cc196; --green-soft:#1f3a2e; --gray-soft:#232e29; --shadow:none; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:960px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 92px)}
+header.top{display:flex;align-items:center;gap:12px;margin:6px 2px 14px}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-size:21px;flex:none}
+header.top h1{font-size:19px;margin:0;font-weight:800;letter-spacing:-.01em}
+header.top .sub{font-size:12.5px;color:var(--muted)}
+.sync{margin-left:auto;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.ok{background:var(--green)} .dot.warn{background:var(--amber)} .dot.err{background:var(--red)}
+
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{padding:14px 12px;border-radius:var(--radius);border:1px solid var(--line);background:var(--card);text-align:left}
+.stat b{display:block;font-size:26px;font-weight:800;line-height:1.1}
+.stat span{font-size:12.5px;color:var(--muted)}
+.stat.r b{color:var(--red)} .stat.a b{color:var(--amber)} .stat.g b{color:var(--green)}
+
+h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:20px 4px 8px;font-weight:700;display:flex;align-items:center;gap:8px}
+h2.sec .count{background:var(--gray-soft);color:var(--ink);border-radius:20px;padding:1px 8px;font-size:12px;letter-spacing:0}
+
+.list{display:flex;flex-direction:column}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.item:first-child{border-top:none}
+.item .ic{width:36px;height:36px;border-radius:10px;background:var(--gray-soft);display:grid;place-items:center;font-size:18px;flex:none}
+.item .tx{flex:1;min-width:0;cursor:pointer}
+.item .tx .n{font-weight:600;line-height:1.25}
+.item .tx .m{font-size:12.5px;color:var(--muted);margin-top:2px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.pill.r{background:var(--red-soft);color:var(--red)} .pill.a{background:var(--amber-soft);color:var(--amber)}
+.pill.g{background:var(--green-soft);color:var(--green)} .pill.n{background:var(--gray-soft);color:var(--muted)}
+
+.check{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:transparent;display:grid;place-items:center;flex:none;transition:.15s}
+.check:hover{border-color:var(--accent);background:var(--accent-soft)}
+.check svg{width:18px;height:18px;stroke:var(--muted)}
+.check:hover svg{stroke:var(--accent)}
+.check.done{background:var(--accent);border-color:var(--accent)}
+.check.done svg{stroke:var(--accent-ink)}
+
+.empty{padding:22px;text-align:center;color:var(--muted)}
+
+/* Estancias */
+.toolbar{display:flex;gap:8px;margin-bottom:10px}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.search input{border:none;background:transparent;outline:none;padding:11px 0;width:100%}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:30px;padding:8px 14px;font-weight:600;font-size:13.5px;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .c{opacity:.6;font-weight:500;margin-left:4px}
+
+.room{margin-bottom:14px;overflow:hidden}
+.room-h{display:flex;align-items:center;gap:10px;padding:14px 14px 10px}
+.room-h .ic{font-size:22px}
+.room-h h3{margin:0;font-size:17px;font-weight:800}
+.room-h .meta{font-size:12.5px;color:var(--muted)}
+.room-h .sp{flex:1}
+.icon-btn{border:none;background:var(--gray-soft);border-radius:10px;width:34px;height:34px;display:grid;place-items:center;font-size:15px}
+.grid-h,.row{display:grid;grid-template-columns:minmax(0,1fr) 160px 92px 104px 48px;gap:10px;align-items:center;padding:0 14px}
+.grid-h{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.row{border-bottom:1px solid var(--line);min-height:58px;padding-top:8px;padding-bottom:8px}
+.row .nm{cursor:pointer;min-width:0}
+.row .nm .n{font-weight:600;line-height:1.25}
+.row .nm .note{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .nm .mob{display:none;font-size:12px;color:var(--muted);margin-top:3px}
+.row .d{font-size:13px;color:var(--muted)}
+.row.off{opacity:.45}
+select.freq{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 8px;font-size:13px;font-weight:600}
+.add-row{display:flex;gap:8px;padding:10px 14px 14px}
+.add-row input{flex:1;border:1px dashed var(--line);background:transparent;border-radius:10px;padding:10px 12px;outline:none}
+.add-row input:focus{border-style:solid;border-color:var(--accent)}
+.btn{border:none;border-radius:12px;padding:10px 16px;font-weight:700;background:var(--gray-soft)}
+.btn.pri{background:var(--accent);color:var(--accent-ink)}
+.btn.danger{background:var(--red-soft);color:var(--red)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+
+@media (max-width:680px){
+  .grid-h{display:none}
+  .row{grid-template-columns:minmax(0,1fr) 128px 44px;gap:8px;padding-left:12px;padding-right:10px}
+  .row .d{display:none}
+  .row .nm .mob{display:block}
+  .check{width:38px;height:38px}
+}
+
+/* Calendario */
+.cal-h{display:flex;align-items:center;gap:8px;padding:14px}
+.cal-h h3{margin:0;flex:1;text-align:center;font-size:17px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 10px 12px}
+.cal .wd{font-size:11px;color:var(--muted);text-align:center;font-weight:700;padding:4px 0}
+.day{aspect-ratio:1/1.05;border-radius:10px;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;gap:3px;font-weight:600;font-size:13.5px}
+.day.out{opacity:.3}
+.day.today{background:var(--accent-soft);color:var(--accent)}
+.day.sel{outline:2px solid var(--ink)}
+.day .dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:32px}
+.day .dots i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.day .dots i.r{background:var(--red)}
+.day .num{font-size:10.5px;color:var(--muted);font-weight:700}
+
+/* Ajustes */
+.set{padding:6px 0}
+.set-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line)}
+.set-row:first-child{border-top:none}
+.set-row .grow{flex:1;min-width:0}
+.set-row input[type=text],.set-row input[type=number],.set-row select{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;min-width:0}
+.set-row .emoji{width:48px;text-align:center}
+.hint{font-size:12.5px;color:var(--muted);padding:0 14px 12px;line-height:1.45}
+
+/* Nav */
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);display:flex;justify-content:center;z-index:20}
+nav.bottom .in{display:flex;gap:4px;max-width:520px;width:100%}
+nav.bottom button{flex:1;border:none;background:transparent;border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:700;color:var(--muted)}
+nav.bottom button .e{font-size:20px;line-height:1.2;filter:grayscale(1);opacity:.7}
+nav.bottom button.on{color:var(--ink);background:var(--gray-soft)}
+nav.bottom button.on .e{filter:none;opacity:1}
+.badge{background:var(--red);color:#fff;border-radius:10px;font-size:10px;padding:0 5px;margin-left:2px}
+
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(10,20,15,.45);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.ov.show{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);max-height:92vh;overflow:auto;animation:up .18s ease-out}
+@media (min-width:700px){.ov{align-items:center}.sheet{border-radius:22px}}
+@keyframes up{from{transform:translateY(30px);opacity:.5}to{transform:none;opacity:1}}
+.sheet h3{margin:0 0 14px;font-size:18px}
+.f{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.f label{font-size:12.5px;font-weight:700;color:var(--muted)}
+.f input,.f select,.f textarea{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:11px 12px;outline:none;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--accent)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.acts .sp{flex:1}
+.hist{font-size:13px;display:flex;flex-wrap:wrap;gap:6px}
+.hist span{background:var(--gray-soft);border-radius:8px;padding:4px 8px;display:inline-flex;gap:6px;align-items:center}
+.hist button{border:none;background:none;color:var(--muted);padding:0;font-size:13px}
+textarea.dump{width:100%;height:180px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:10px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 84px);transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 14px 11px 16px;border-radius:14px;display:flex;gap:14px;align-items:center;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:92vw}
+.toast.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
+.toast button{border:none;background:transparent;color:var(--accent);font-weight:800;filter:brightness(1.4)}
+details.never summary{cursor:pointer;list-style:none}
+details.never summary::-webkit-details-marker{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo">🧽</div>
+    <div>
+      <h1>Casa al día</h1>
+      <div class="sub" id="today-lbl"></div>
+    </div>
+    <div class="sync" id="sync"><span class="dot"></span><span>Cargando…</span></div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<nav class="bottom"><div class="in">
+  <button data-v="hoy"><span class="e">📋</span><span>Hoy<span id="nav-badge"></span></span></button>
+  <button data-v="estancias"><span class="e">🏠</span><span>Estancias</span></button>
+  <button data-v="calendario"><span class="e">📅</span><span>Calendario</span></button>
+  <button data-v="ajustes"><span class="e">⚙️</span><span>Ajustes</span></button>
+</div></nav>
+
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"><span id="toast-t"></span><button id="toast-b"></button></div>
+
+<script>
+/* ============ Datos por defecto ============ */
+const UNITS={d:["día","días"],w:["semana","semanas"],m:["mes","meses"],y:["año","años"]};
+const DEFAULT_FREQS=[
+  {id:"sem",name:"Semanal",n:1,u:"w"},
+  {id:"2sem",name:"Cada 2 semanas",n:2,u:"w"},
+  {id:"3sem",name:"Cada 3 semanas",n:3,u:"w"},
+  {id:"mes",name:"Mensual",n:1,u:"m"},
+  {id:"3mes",name:"Cada 3 meses",n:3,u:"m"},
+  {id:"6mes",name:"Cada 6 meses",n:6,u:"m"},
+  {id:"anual",name:"Anual",n:1,u:"y"},
+  {id:"otros",name:"Otros…",custom:true}
+];
+const T=(name,freq,note)=>({name,freq,note:note||""});
+const BANO_TASKS=()=>[
+  T("Limpiar y desinfectar inodoro","sem"),
+  T("Limpiar lavabo, grifos y espejo","sem"),
+  T("Limpiar ducha / bañera y mampara","sem"),
+  T("Fregar suelo","sem"),
+  T("Cambiar toallas","sem"),
+  T("Lavar alfombrilla y cortina de ducha","mes"),
+  T("Limpiar juntas de azulejos","mes"),
+  T("Limpiar desagües y sifones","mes"),
+  T("Limpiar ventilador / extractor","3mes","Quitar rejilla, aspirar y lavar"),
+  T("Descalcificar alcachofa de la ducha y aireadores","3mes"),
+  T("Ordenar armario y revisar caducidades","6mes"),
+  T("Revisar silicona de sanitarios","anual")
+];
+const HAB_TASKS=()=>[
+  T("Cambiar sábanas","sem"),
+  T("Aspirar / fregar suelo","sem"),
+  T("Quitar polvo de mesitas, escritorio y estanterías","2sem"),
+  T("Limpiar pantalla, teclado y ratón","2sem"),
+  T("Mover la cama y limpiar debajo","mes"),
+  T("Limpiar cristales de la ventana","mes"),
+  T("Ordenar armario y cajones","3mes")
+];
+const ROOM_ORDER=["recibidor","cocina","comedor","pasillo","baño","baño suite","dormitorio","habitación marc","habitación júlia","despacho","galería","terraza","general"];
+const DEFAULT_ROOMS=[
+ {name:"Recibidor",icon:"🚪",tasks:[
+  T("Barrer / fregar suelo","sem"),
+  T("Sacudir o lavar el felpudo","2sem"),
+  T("Limpiar espejo y mueble del recibidor","2sem"),
+  T("Limpiar puerta de entrada, pomo y mirilla","mes"),
+  T("Ordenar y limpiar el zapatero","mes"),
+  T("Limpiar telefonillo e interruptores","mes")
+ ]},
+ {name:"Cocina",icon:"🍳",tasks:[
+  T("Limpiar encimera y fregadero a fondo","sem"),
+  T("Limpiar vitrocerámica / placa","sem"),
+  T("Limpiar microondas por dentro y fuera","sem","Truco: bol de agua con limón 3 min y pasar bayeta"),
+  T("Fregar suelo y rodapiés","sem"),
+  T("Limpiar frontales de armarios y tiradores","2sem"),
+  T("Limpiar exterior de electrodomésticos","2sem"),
+  T("Lavar filtros de la campana","mes","Lavavajillas o agua caliente con desengrasante"),
+  T("Desengrasar campana por fuera","mes"),
+  T("Limpiar horno a fondo (bandejas y rejillas)","mes"),
+  T("Limpiar nevera por dentro y revisar caducidades","mes"),
+  T("Limpiar filtro y juntas del lavavajillas","mes"),
+  T("Limpiar azulejos / salpicadero","mes"),
+  T("Desinfectar cubos de basura","mes"),
+  T("Limpiar armarios bajos por dentro","3mes"),
+  T("Ordenar despensa y revisar caducidades","3mes"),
+  T("Descalcificar hervidor / cafetera","3mes"),
+  T("Limpiar armarios altos por dentro y encima","6mes"),
+  T("Descongelar y limpiar congelador","6mes"),
+  T("Cambiar filtro de carbón de la campana","anual","Solo si es campana de recirculación"),
+  T("Limpiar detrás de la nevera y rejilla trasera","anual")
+ ]},
+ {name:"Comedor",icon:"🛋️",tasks:[
+  T("Aspirar / fregar suelo","sem"),
+  T("Quitar polvo de muebles y estanterías","sem"),
+  T("Aspirar sofá y cojines","2sem"),
+  T("Limpiar TV y aparatos electrónicos","2sem"),
+  T("Retirar sofá y limpiar debajo y detrás","mes"),
+  T("Limpiar cristales de ventanas","mes"),
+  T("Limpiar rodapiés, puertas e interruptores","mes"),
+  T("Lavar fundas de cojines y mantas","3mes"),
+  T("Limpiar lámparas y plafones","3mes"),
+  T("Limpiar alfombra a fondo","6mes"),
+  T("Limpiar tapicería del sofá en profundidad","anual")
+ ]},
+ {name:"Pasillo",icon:"🚶",tasks:[
+  T("Aspirar / fregar suelo","sem"),
+  T("Limpiar rodapiés","mes"),
+  T("Quitar polvo de cuadros, marcos y lámparas","mes"),
+  T("Limpiar armario empotrado por dentro","6mes")
+ ]},
+ {name:"Baño",icon:"🛁",tasks:BANO_TASKS()},
+ {name:"Baño suite",icon:"🚿",tasks:BANO_TASKS()},
+ {name:"Dormitorio",icon:"🛏️",tasks:[
+  T("Cambiar sábanas","sem"),
+  T("Aspirar / fregar suelo","sem"),
+  T("Quitar polvo de mesitas y cómoda","2sem"),
+  T("Mover la cama y limpiar debajo","mes"),
+  T("Lavar protector de colchón y fundas de almohada","mes"),
+  T("Limpiar cristales de la ventana","mes"),
+  T("Ordenar armario y cajones","3mes")
+ ]},
+ {name:"Habitación Marc",icon:"🎧",tasks:HAB_TASKS()},
+ {name:"Habitación Júlia",icon:"🎬",tasks:HAB_TASKS()},
+ {name:"Despacho",icon:"💻",tasks:[
+  T("Quitar polvo del escritorio","sem"),
+  T("Aspirar / fregar suelo","sem"),
+  T("Limpiar pantallas, teclado y ratón","2sem"),
+  T("Ordenar papeles y vaciar papelera","mes"),
+  T("Limpiar cables y detrás de los muebles","3mes"),
+  T("Limpiar estanterías y libros","3mes")
+ ]},
+ {name:"Galería",icon:"🧺",tasks:[
+  T("Barrer / fregar suelo","sem"),
+  T("Limpiar filtro de la secadora","sem"),
+  T("Limpiar cajetín de detergente de la lavadora","mes"),
+  T("Lavado en vacío de la lavadora (90 ºC)","mes"),
+  T("Limpiar goma de la puerta de la lavadora","mes"),
+  T("Limpiar cristales de la galería","mes"),
+  T("Limpiar filtro de bomba de la lavadora","3mes"),
+  T("Limpiar tendedero y pinzas","3mes"),
+  T("Ordenar productos de limpieza","3mes")
+ ]},
+ {name:"Terraza",icon:"🌿",tasks:[
+  T("Barrer terraza","sem"),
+  T("Fregar suelo de la terraza","2sem"),
+  T("Limpiar mesa y sillas","2sem"),
+  T("Limpiar barandilla","mes"),
+  T("Limpiar macetas y quitar hojas secas","mes"),
+  T("Limpiar desagüe de la terraza","3mes"),
+  T("Lavar cojines y fundas de exterior","3mes"),
+  T("Limpiar toldo","6mes"),
+  T("Proteger / tratar mobiliario de exterior","anual","Aceite para madera o protector según material")
+ ]},
+ {name:"General",icon:"🏡",tasks:[
+  T("Vaciar papeleras de toda la casa","sem"),
+  T("Limpiar pomos, interruptores y mandos","2sem"),
+  T("Limpiar depósito y cepillos del robot aspirador","2sem"),
+  T("Limpiar puertas y marcos","mes"),
+  T("Aspirar y dar la vuelta a colchones","3mes"),
+  T("Limpiar persianas y carriles de ventanas","3mes"),
+  T("Quitar telarañas de techos y esquinas","3mes"),
+  T("Lavar cortinas","6mes"),
+  T("Armarios a fondo y cambio de temporada","6mes"),
+  T("Lavar edredones y almohadas","6mes"),
+  T("Limpiar filtros del aire acondicionado","6mes"),
+  T("Probar detectores de humo","6mes"),
+  T("Limpiar radiadores","anual","Antes del invierno"),
+  T("Revisar botiquín y caducidades","anual")
+ ]}
+];
+
+/* ============ Utilidades ============ */
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const toISO=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parse=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const todayISO=()=>toISO(new Date());
+const diffDays=(a,b)=>Math.round((parse(b)-parse(a))/86400000);
+function addInt(iso,n,u){
+  const d=parse(iso);
+  if(u==="d")d.setDate(d.getDate()+n);
+  else if(u==="w")d.setDate(d.getDate()+7*n);
+  else{const months=u==="y"?12*n:n;const day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+months);
+    const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));}
+  return toISO(d);
+}
+const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const fmt=iso=>{if(!iso)return"—";const d=parse(iso);return d.getDate()+" "+MES[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?" "+String(d.getFullYear()).slice(2):"")};
+function rel(n){if(n===0)return"hoy";if(n===1)return"mañana";if(n===-1)return"ayer";return n>0?"en "+n+" días":"hace "+(-n)+" días"}
+function intLabel(n,u){return n===1?("Cada "+UNITS[u][0]):("Cada "+n+" "+UNITS[u][1])}
+
+/* ============ Estado ============ */
+const mkRoom=r=>({id:uid(),name:r.name,icon:r.icon,tasks:r.tasks.map(t=>({id:uid(),name:t.name,freq:t.freq,note:t.note,cn:2,cu:"w",last:null,hist:[],off:false}))});
+function defaults(){
+  return {v:1,mig:2,soon:7,freqs:JSON.parse(JSON.stringify(DEFAULT_FREQS)),rooms:DEFAULT_ROOMS.map(mkRoom)};
+}
+let justMigrated=false;
+function migrate(s){
+  // v2: estancias según el plano de casa (sin tocar lo ya registrado)
+  const key=n=>String(n).trim().toLowerCase();
+  const has=n=>s.rooms.some(r=>key(r.name)===key(n));
+  const banos=s.rooms.find(r=>key(r.name)==="baños");
+  if(banos&&!has("baño"))banos.name="Baño";
+  DEFAULT_ROOMS.forEach(d=>{if(!has(d.name))s.rooms.push(mkRoom(d))});
+  const gen=s.rooms.find(r=>key(r.name)==="general");
+  if(gen)gen.tasks=gen.tasks.filter(t=>!(key(t.name)==="cambiar sábanas"&&!t.last));
+  const idx=r=>{const i=ROOM_ORDER.indexOf(key(r.name));return i<0?ROOM_ORDER.length-1:i};
+  s.rooms=s.rooms.map((r,i)=>({r,i})).sort((a,b)=>idx(a.r)-idx(b.r)||a.i-b.i).map(x=>x.r);
+  s.mig=2;justMigrated=true;
+  return s;
+}
+function normalize(s){
+  if(!s||!Array.isArray(s.rooms)||!Array.isArray(s.freqs))return defaults();
+  s.soon=Number(s.soon)||7;
+  if(!s.freqs.some(f=>f.custom))s.freqs.push({id:"otros",name:"Otros…",custom:true});
+  s.rooms.forEach(r=>{r.id=r.id||uid();r.tasks=(r.tasks||[]).map(t=>Object.assign({id:uid(),note:"",cn:2,cu:"w",last:null,hist:[],off:false},t))});
+  if(!(s.mig>=2))migrate(s);
+  return s;
+}
+let state;
+const LS="casa-al-dia-v1";
+try{state=normalize(JSON.parse(localStorage.getItem(LS)))}catch(e){state=defaults()}
+function cacheLocal(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
+
+const freqById=id=>state.freqs.find(f=>f.id===id)||state.freqs[0];
+function interval(t){const f=freqById(t.freq);return f.custom?{n:Math.max(1,Number(t.cn)||1),u:t.cu||"d"}:{n:f.n,u:f.u}}
+function freqText(t){const f=freqById(t.freq);if(f.custom){const i=interval(t);return intLabel(i.n,i.u)}return f.name}
+function nextDue(t){if(!t.last)return null;const i=interval(t);return addInt(t.last,i.n,i.u)}
+function status(t){
+  if(!t.last)return{k:"n",days:null,next:null};
+  const next=nextDue(t),d=diffDays(todayISO(),next);
+  return{k:d<0?"r":(d<=state.soon?"a":"g"),days:d,next};
+}
+function allTasks(){const out=[];state.rooms.forEach(r=>r.tasks.forEach(t=>out.push({t,r})));return out}
+function findTask(id){for(const r of state.rooms){const t=r.tasks.find(x=>x.id===id);if(t)return{t,r}}return null}
+
+/* ============ Guardado en la nube (db) + local ============ */
+let db=null,docRef=null,lastRev=null,saving=false,again=false,saveTimer=null,cloudOK=false;
+function setSync(kind,text){$("#sync").innerHTML='<span class="dot '+kind+'"></span><span>'+esc(text)+'</span>'}
+function changed(){cacheLocal();render();clearTimeout(saveTimer);saveTimer=setTimeout(doSave,700);if(docRef)setSync("warn","Guardando…")}
+async function doSave(){
+  if(!docRef){setSync("ok","Guardado en este móvil");return}
+  if(saving){again=true;return}
+  saving=true;
+  const rev=Date.now()+"-"+uid();lastRev=rev;
+  try{await docRef.set({json:JSON.stringify(state),rev,updated:new Date().toISOString()});setSync("ok","Guardado")}
+  catch(e){
+    if(e&&e.code==="unavailable"){await new Promise(r=>setTimeout(r,800+Math.random()*800));try{await docRef.set({json:JSON.stringify(state),rev,updated:new Date().toISOString()});setSync("ok","Guardado")}catch(e2){setSync("err","Sin conexión · guardado local")}}
+    else if(e&&e.code==="quota_exceeded")setSync("err","Nube llena · guardado local");
+    else setSync("err","Solo guardado local");
+  }
+  saving=false;
+  if(again){again=false;doSave()}
+}
+async function initCloud(){
+  setSync("ok","Guardado en este móvil");return;
+  try{ if(window.claude&&claude.use) db=await claude.use("db") }catch(e){db=null}
+  if(!db){setSync("warn","Guardado en este dispositivo");return}
+  try{docRef=db.doc("hogar/principal")}catch(e){docRef=null;setSync("warn","Guardado en este dispositivo");return}
+  const to=setTimeout(()=>setSync("warn","Nube no disponible aún"),10000);
+  docRef.onSnapshot(snap=>{
+    if(snap.metadata&&snap.metadata.hasPendingWrites)return;
+    if(!snap.metadata||!snap.metadata.fromCache)clearTimeout(to);
+    if(snap.exists){
+      const d=snap.data();
+      if(d&&d.json&&d.rev!==lastRev){
+        try{justMigrated=false;state=normalize(JSON.parse(d.json));lastRev=d.rev;cacheLocal();render();
+          if(justMigrated){justMigrated=false;clearTimeout(saveTimer);saveTimer=setTimeout(doSave,700)}}catch(e){}
+      }
+    }
+    cloudOK=true;
+    if(!saving)setSync(snap.metadata&&snap.metadata.fromCache?"warn":"ok",snap.metadata&&snap.metadata.fromCache?"Sincronizando…":"Guardado en la nube");
+  },err=>{clearTimeout(to);docRef=null;setSync("err","Solo guardado local")});
+}
+
+/* ============ Acciones ============ */
+let undo=null;
+function markDone(id,dateISO){
+  const f=findTask(id);if(!f)return;const t=f.t;
+  const prev={last:t.last,hist:t.hist.slice()};
+  const d=dateISO||todayISO();
+  t.last=(!t.last||d>t.last)?d:t.last;
+  if(!t.hist.includes(d)){t.hist.unshift(d);t.hist.sort().reverse();t.hist=t.hist.slice(0,15)}
+  changed();
+  toast("✓ "+t.name+" · próxima "+fmt(nextDue(t)),"Deshacer",()=>{t.last=prev.last;t.hist=prev.hist;changed()});
+}
+function setFreq(id,freq){
+  const f=findTask(id);if(!f)return;
+  f.t.freq=freq;
+  if(freqById(freq).custom){changed();openTask(id);return}
+  changed();
+}
+
+/* ============ Toast ============ */
+let toastTimer;
+function toast(text,btn,fn){
+  $("#toast-t").textContent=text;const b=$("#toast-b");
+  b.style.display=btn?"":"none";b.textContent=btn||"";b.onclick=()=>{hideToast();fn&&fn()};
+  $("#toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(hideToast,4500);
+}
+function hideToast(){$("#toast").classList.remove("show")}
+
+/* ============ Modal ============ */
+function openSheet(html){$("#sheet").innerHTML=html;$("#ov").classList.add("show")}
+function closeSheet(){$("#ov").classList.remove("show")}
+$("#ov").addEventListener("click",e=>{if(e.target.id==="ov")closeSheet()});
+function confirmBox(title,msg,okText,fn){
+  openSheet(`<h3>${esc(title)}</h3><p style="color:var(--muted);margin-top:-4px">${esc(msg)}</p>
+  <div class="acts"><span class="sp"></span><button class="btn" id="c-no">Cancelar</button><button class="btn danger" id="c-ok">${esc(okText)}</button></div>`);
+  $("#c-no").onclick=closeSheet;$("#c-ok").onclick=()=>{closeSheet();fn()};
+}
+function freqOptions(sel){return state.freqs.map(f=>`<option value="${f.id}"${f.id===sel?" selected":""}>${esc(f.name)}</option>`).join("")}
+function unitOptions(sel){return Object.keys(UNITS).map(u=>`<option value="${u}"${u===sel?" selected":""}>${UNITS[u][1]}</option>`).join("")}
+
+function openTask(id,roomId){
+  const isNew=!id;
+  const f=id?findTask(id):null;
+  const t=f?f.t:{name:"",freq:state.freqs[0].id,note:"",cn:2,cu:"w",last:null,hist:[],off:false};
+  const rid=f?f.r.id:(roomId||state.rooms[0]?.id);
+  const roomsOpt=state.rooms.map(r=>`<option value="${r.id}"${r.id===rid?" selected":""}>${esc(r.icon+" "+r.name)}</option>`).join("");
+  openSheet(`<h3>${isNew?"Nueva tarea":"Editar tarea"}</h3>
+   <div class="f"><label>Tarea</label><input id="t-name" type="text" value="${esc(t.name)}" placeholder="Ej.: Limpiar filtros de la campana"></div>
+   <div class="f2">
+    <div class="f"><label>Estancia</label><select id="t-room">${roomsOpt}</select></div>
+    <div class="f"><label>Periodicidad</label><select id="t-freq">${freqOptions(t.freq)}</select></div>
+   </div>
+   <div class="f2" id="t-custom" style="display:${freqById(t.freq).custom?"grid":"none"}">
+    <div class="f"><label>Cada</label><input id="t-cn" type="number" min="1" value="${t.cn||2}"></div>
+    <div class="f"><label>Unidad</label><select id="t-cu">${unitOptions(t.cu||"w")}</select></div>
+   </div>
+   <div class="f"><label>Última vez que se hizo</label><input id="t-last" type="date" value="${t.last||""}" max="${todayISO()}"></div>
+   <div class="f"><label>Notas</label><textarea id="t-note" rows="2" placeholder="Productos, trucos, quién lo hace…">${esc(t.note)}</textarea></div>
+   <label class="toggle" style="margin-bottom:12px"><input type="checkbox" id="t-off"${t.off?" checked":""}> Pausar esta tarea (no avisa)</label>
+   ${!isNew&&t.hist.length?`<div class="f"><label>Historial</label><div class="hist">${t.hist.map(h=>`<span>${fmt(h)} <button data-h="${h}" title="Borrar">✕</button></span>`).join("")}</div></div>`:""}
+   <div class="acts">
+    ${isNew?"":'<button class="btn danger" id="t-del">Eliminar</button>'}
+    <span class="sp"></span>
+    <button class="btn" id="t-cancel">Cancelar</button>
+    <button class="btn pri" id="t-save">Guardar</button>
+   </div>`);
+  $("#t-freq").onchange=e=>{$("#t-custom").style.display=freqById(e.target.value).custom?"grid":"none"};
+  $("#t-cancel").onclick=closeSheet;
+  document.querySelectorAll("#sheet [data-h]").forEach(b=>b.onclick=()=>{
+    t.hist=t.hist.filter(x=>x!==b.dataset.h);
+    if(t.last===b.dataset.h)t.last=t.hist[0]||null;
+    changed();openTask(id);
+  });
+  if(!isNew)$("#t-del").onclick=()=>confirmBox("Eliminar tarea","Se borrará «"+t.name+"» y su historial.","Eliminar",()=>{f.r.tasks=f.r.tasks.filter(x=>x.id!==id);changed()});
+  $("#t-save").onclick=()=>{
+    const name=$("#t-name").value.trim();if(!name){$("#t-name").focus();return}
+    const nt=isNew?{id:uid(),hist:[]}:t;
+    nt.name=name;nt.freq=$("#t-freq").value;nt.note=$("#t-note").value.trim();
+    nt.cn=Math.max(1,parseInt($("#t-cn").value)||1);nt.cu=$("#t-cu").value;nt.off=$("#t-off").checked;
+    const last=$("#t-last").value||null;
+    if(last!==t.last){nt.last=last;if(last&&!nt.hist.includes(last)){nt.hist.unshift(last);nt.hist.sort().reverse()}}
+    else nt.last=t.last||null;
+    const newRoom=state.rooms.find(r=>r.id===$("#t-room").value);
+    if(isNew)newRoom.tasks.push(nt);
+    else if(newRoom.id!==f.r.id){f.r.tasks=f.r.tasks.filter(x=>x.id!==id);newRoom.tasks.push(nt)}
+    closeSheet();changed();
+  };
+  if(isNew)setTimeout(()=>$("#t-name").focus(),50);
+}
+
+function openRoom(id){
+  const isNew=!id;const r=id?state.rooms.find(x=>x.id===id):{name:"",icon:"🏷️"};
+  openSheet(`<h3>${isNew?"Nueva estancia":"Editar estancia"}</h3>
+   <div class="f2" style="grid-template-columns:80px 1fr">
+    <div class="f"><label>Icono</label><input id="r-icon" type="text" value="${esc(r.icon)}" style="text-align:center;font-size:20px"></div>
+    <div class="f"><label>Nombre</label><input id="r-name" type="text" value="${esc(r.name)}" placeholder="Ej.: Dormitorio"></div>
+   </div>
+   <div class="hint" style="padding:0 0 10px">Ideas de icono: 🛏️ 🧸 💻 🚗 🐶 🪴 🧹 🚪 🪟 🧼</div>
+   <div class="acts">${isNew?"":'<button class="btn danger" id="r-del">Eliminar</button>'}<span class="sp"></span>
+   <button class="btn" id="r-cancel">Cancelar</button><button class="btn pri" id="r-save">Guardar</button></div>`);
+  $("#r-cancel").onclick=closeSheet;
+  if(!isNew)$("#r-del").onclick=()=>confirmBox("Eliminar estancia","Se borrará «"+r.name+"» con sus "+r.tasks.length+" tareas.","Eliminar",()=>{state.rooms=state.rooms.filter(x=>x.id!==id);if(roomFilter===id)roomFilter="all";changed()});
+  $("#r-save").onclick=()=>{
+    const name=$("#r-name").value.trim();if(!name){$("#r-name").focus();return}
+    const icon=$("#r-icon").value.trim()||"🏷️";
+    if(isNew)state.rooms.push({id:uid(),name,icon,tasks:[]});else{r.name=name;r.icon=icon}
+    closeSheet();changed();
+  };
+  setTimeout(()=>$("#r-name").focus(),50);
+}
+
+function openFreq(id){
+  const isNew=!id;const f=id?state.freqs.find(x=>x.id===id):{name:"",n:1,u:"w"};
+  openSheet(`<h3>${isNew?"Nueva periodicidad":"Editar periodicidad"}</h3>
+   <div class="f"><label>Nombre</label><input id="f-name" type="text" value="${esc(f.name)}" placeholder="Ej.: Cada 10 días"></div>
+   ${f.custom?'<div class="hint" style="padding:0 0 10px">«Otros» permite poner un intervalo distinto en cada tarea.</div>':`
+   <div class="f2"><div class="f"><label>Cada</label><input id="f-n" type="number" min="1" value="${f.n}"></div>
+   <div class="f"><label>Unidad</label><select id="f-u">${unitOptions(f.u)}</select></div></div>`}
+   <div class="acts">${isNew||f.custom?"":'<button class="btn danger" id="f-del">Eliminar</button>'}<span class="sp"></span>
+   <button class="btn" id="f-cancel">Cancelar</button><button class="btn pri" id="f-save">Guardar</button></div>`);
+  $("#f-cancel").onclick=closeSheet;
+  if($("#f-n"))$("#f-n").oninput=$("#f-u").onchange=()=>{if(isNew&&!$("#f-name").dataset.touched)$("#f-name").value=intLabel(parseInt($("#f-n").value)||1,$("#f-u").value)};
+  $("#f-name").oninput=e=>e.target.dataset.touched=1;
+  if($("#f-del"))$("#f-del").onclick=()=>{
+    const used=allTasks().filter(x=>x.t.freq===id);
+    const alt=state.freqs.find(x=>x.id!==id&&!x.custom);
+    confirmBox("Eliminar periodicidad",used.length?("La usan "+used.length+" tareas; pasarán a «"+alt.name+"»."):"No la usa ninguna tarea.","Eliminar",()=>{
+      used.forEach(x=>x.t.freq=alt.id);state.freqs=state.freqs.filter(x=>x.id!==id);changed()});
+  };
+  $("#f-save").onclick=()=>{
+    const name=$("#f-name").value.trim();if(!name){$("#f-name").focus();return}
+    if(f.custom){f.name=name}
+    else{const n=Math.max(1,parseInt($("#f-n").value)||1),u=$("#f-u").value;
+      if(isNew){const i=state.freqs.findIndex(x=>x.custom);state.freqs.splice(i<0?state.freqs.length:i,0,{id:uid(),name,n,u})}
+      else Object.assign(f,{name,n,u});}
+    closeSheet();changed();
+  };
+}
+
+/* ============ Exportar ============ */
+async function offerFile(filename,data,mime,share){
+  try{
+    const file=new File([data],filename,{type:mime||"text/plain"});
+    if(share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:filename,text:"Configuración de Casa al día"});return}
+      catch(e){if(e&&e.name==="AbortError")return}
+    }
+    const url=URL.createObjectURL(file);const a=document.createElement("a");a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
+    toast("Archivo descargado: "+filename);return;
+  }catch(e){}
+  openSheet(`<h3>${esc(filename)}</h3><p class="hint" style="padding:0 0 8px">No se ha podido descargar desde aquí. Copia el contenido y guárdalo en un archivo con ese nombre.</p>
+   <textarea class="dump" readonly id="dump">${esc(data)}</textarea>
+   <div class="acts"><span class="sp"></span><button class="btn" id="d-close">Cerrar</button><button class="btn pri" id="d-copy">Copiar</button></div>`);
+  $("#d-close").onclick=closeSheet;
+  $("#d-copy").onclick=async()=>{try{await navigator.clipboard.writeText(data);toast("Copiado")}catch(e){$("#dump").select();toast("Selecciónalo y copia")}};
+}
+function exportJSON(share){offerFile("casa-al-dia-"+todayISO()+".json",JSON.stringify(state,null,1),"application/json",share)}
+function importJSON(){
+  openSheet(`<h3>Importar copia</h3><p class="hint" style="padding:0 0 8px">Elige un archivo .json exportado antes o pega su contenido. Reemplaza todos los datos actuales.</p>
+  <input type="file" id="imp-file" accept=".json,application/json" style="margin-bottom:10px">
+  <textarea class="dump" id="imp-txt" placeholder="…o pega aquí el JSON"></textarea>
+  <div class="acts"><span class="sp"></span><button class="btn" id="i-no">Cancelar</button><button class="btn pri" id="i-ok">Importar</button></div>`);
+  $("#imp-file").onchange=e=>{const fl=e.target.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>$("#imp-txt").value=rd.result;rd.readAsText(fl)};
+  $("#i-no").onclick=closeSheet;
+  $("#i-ok").onclick=()=>{try{const s=JSON.parse($("#imp-txt").value);if(!s.rooms||!s.freqs)throw 0;state=normalize(s);closeSheet();changed();toast("Copia importada")}catch(e){toast("El contenido no es una copia válida")}};
+}
+function exportICS(){
+  const rr={d:"DAILY",w:"WEEKLY",m:"MONTHLY",y:"YEARLY"};
+  const stamp=new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+  const escI=s=>String(s).replace(/\\/g,"\\\\").replace(/[,;]/g,m=>"\\"+m).replace(/\n/g,"\\n");
+  let out=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Casa al dia//ES","CALSCALE:GREGORIAN","X-WR-CALNAME:Limpieza del hogar"];
+  allTasks().filter(x=>!x.t.off).forEach(({t,r})=>{
+    const i=interval(t);let start=nextDue(t)||todayISO();
+    if(start<todayISO())start=todayISO();
+    const ds=start.replace(/-/g,""),de=addInt(start,1,"d").replace(/-/g,"");
+    out.push("BEGIN:VEVENT","UID:"+t.id+"@casa-al-dia","DTSTAMP:"+stamp,"DTSTART;VALUE=DATE:"+ds,"DTEND;VALUE=DATE:"+de,
+      "SUMMARY:"+escI(r.icon+" "+t.name),"DESCRIPTION:"+escI(r.name+" · "+freqText(t)+(t.note?"\n"+t.note:"")),
+      "RRULE:FREQ="+rr[i.u]+";INTERVAL="+i.n,"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+escI(t.name),"TRIGGER:PT9H","END:VALARM","END:VEVENT");
+  });
+  out.push("END:VCALENDAR");
+  offerFile("limpieza-hogar.ics",out.join("\r\n"),"text/calendar");
+}
+
+/* ============ Vistas ============ */
+let view=(location.hash||"").slice(1);if(!["hoy","estancias","calendario","ajustes"].includes(view))view="hoy";
+let roomFilter="all",query="",calMonth=(()=>{const d=new Date();return{y:d.getFullYear(),m:d.getMonth()}})(),calSel=todayISO();
+const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+function pillFor(s){
+  if(s.k==="n")return'<span class="pill n">sin fecha</span>';
+  return`<span class="pill ${s.k}">${s.k==="r"?"vencida "+rel(s.days):rel(s.days)}</span>`;
+}
+function itemHTML({t,r},extra){
+  const s=status(t);
+  return`<div class="item"><div class="ic">${esc(r.icon)}</div>
+   <div class="tx" data-edit="${t.id}"><div class="n">${esc(t.name)}</div>
+   <div class="m">${esc(r.name)} · ${esc(freqText(t))}${t.last?" · hecha "+fmt(t.last):""} ${extra===false?"":pillFor(s)}</div></div>
+   <button class="check" data-done="${t.id}" title="Marcar como hecha hoy">${CHECK}</button></div>`;
+}
+
+function renderHoy(){
+  const tasks=allTasks().filter(x=>!x.t.off);
+  const over=[],soon=[],ok=[],never=[];
+  tasks.forEach(x=>{const s=status(x.t);x.s=s;const k=(s.k==="a"&&x.t.last===todayISO())?"g":s.k;({r:over,a:soon,g:ok,n:never})[k].push(x)});
+  over.sort((a,b)=>a.s.days-b.s.days);soon.sort((a,b)=>a.s.days-b.s.days);
+  const doneToday=tasks.filter(x=>x.t.last===todayISO());
+  let h=`<div class="stats">
+    <button class="stat r" data-jump="over"><b>${over.length}</b><span>Vencidas</span></button>
+    <button class="stat a" data-jump="soon"><b>${soon.length}</b><span>Próximos ${state.soon} días</span></button>
+    <button class="stat g"><b>${ok.length}</b><span>Al día</span></button></div>`;
+  if(!over.length&&!soon.length&&!never.length)h+=`<div class="card empty">🎉 Todo al día. ¡Buen trabajo!</div>`;
+  if(over.length)h+=`<h2 class="sec" id="over">Vencidas <span class="count">${over.length}</span></h2><div class="card list">${over.map(itemHTML).join("")}</div>`;
+  if(soon.length)h+=`<h2 class="sec" id="soon">Próximamente <span class="count">${soon.length}</span></h2><div class="card list">${soon.map(itemHTML).join("")}</div>`;
+  if(doneToday.length)h+=`<h2 class="sec">Hechas hoy <span class="count">${doneToday.length}</span></h2><div class="card list">${doneToday.map(x=>itemHTML(x,false).replace('class="check"','class="check done"')).join("")}</div>`;
+  if(never.length){
+    h+=`<details class="never"${over.length+soon.length===0?" open":""}><summary><h2 class="sec">Sin registrar <span class="count">${never.length}</span> <span style="text-transform:none;letter-spacing:0;font-weight:500">· toca para ver</span></h2></summary>
+    <div class="hint" style="padding:0 4px 10px">Estas tareas aún no tienen fecha. Márcalas con ✓ cuando las hagas o edítalas para poner la última vez que se hicieron, y a partir de ahí la app calcula la próxima.</div>
+    <div class="card list">${never.map(itemHTML).join("")}</div></details>`;
+  }
+  return h;
+}
+
+function renderEstancias(){
+  const q=query.trim().toLowerCase();
+  let h=`<div class="toolbar"><label class="search">🔎<input id="q" type="search" placeholder="Buscar tarea…" value="${esc(query)}"></label>
+   <button class="btn pri" id="add-task">+ Tarea</button></div>
+   <div class="chips"><button class="chip${roomFilter==="all"?" on":""}" data-room="all">Todas</button>
+   ${state.rooms.map(r=>`<button class="chip${roomFilter===r.id?" on":""}" data-room="${r.id}">${esc(r.icon)} ${esc(r.name)}<span class="c">${r.tasks.length}</span></button>`).join("")}
+   <button class="chip" id="add-room">+ Estancia</button></div>`;
+  const rooms=state.rooms.filter(r=>roomFilter==="all"||r.id===roomFilter);
+  rooms.forEach(r=>{
+    const ts=r.tasks.filter(t=>!q||t.name.toLowerCase().includes(q)||t.note.toLowerCase().includes(q));
+    if(q&&!ts.length)return;
+    const over=r.tasks.filter(t=>!t.off&&status(t).k==="r").length;
+    h+=`<section class="card room"><div class="room-h"><span class="ic">${esc(r.icon)}</span><div><h3>${esc(r.name)}</h3>
+      <div class="meta">${r.tasks.length} tareas${over?` · <span style="color:var(--red);font-weight:700">${over} vencidas</span>`:""}</div></div>
+      <span class="sp"></span><button class="icon-btn" data-editroom="${r.id}" title="Editar estancia">✏️</button></div>
+      <div class="grid-h"><span>Tarea</span><span>Periodicidad</span><span>Última vez</span><span>Próxima</span><span></span></div>
+      ${ts.map(t=>{const s=status(t);
+        return`<div class="row${t.off?" off":""}"><div class="nm" data-edit="${t.id}"><div class="n">${esc(t.name)}</div>
+        ${t.note?`<div class="note">${esc(t.note)}</div>`:""}
+        <div class="mob">${t.last?"Hecha "+fmt(t.last)+" · ":""}${t.off?"en pausa":pillFor(s)}</div></div>
+        <select class="freq" data-freq="${t.id}" aria-label="Periodicidad">${freqOptions(t.freq)}</select>
+        <div class="d">${fmt(t.last)}</div>
+        <div class="d">${t.off?"en pausa":(s.next?`${fmt(s.next)}<br>${pillFor(s)}`:pillFor(s))}</div>
+        <button class="check${t.last===todayISO()?" done":""}" data-done="${t.id}" title="Marcar como hecha hoy">${CHECK}</button></div>`}).join("")}
+      ${q?"":`<form class="add-row" data-addto="${r.id}"><input placeholder="Añadir tarea a ${esc(r.name)}…" name="n"><button class="btn sm pri">Añadir</button></form>`}
+    </section>`;
+  });
+  if(!rooms.length)h+=`<div class="card empty">No hay estancias. Crea una con «+ Estancia».</div>`;
+  return h;
+}
+
+function occurrencesInRange(t,from,to){
+  // fechas de vencimiento (proyectadas) entre from y to
+  const res=[];if(t.off)return res;const i=interval(t);
+  let d=nextDue(t);
+  if(!d)return res;
+  const today=todayISO();
+  if(d<today){ if(d>=from&&d<=to)res.push(d); while(d<today)d=addInt(d,i.n,i.u); }
+  let guard=0;
+  while(d<from&&guard++<1000)d=addInt(d,i.n,i.u);
+  guard=0;
+  while(d<=to&&guard++<500){res.push(d);d=addInt(d,i.n,i.u)}
+  return res;
+}
+function renderCalendario(){
+  const {y,m}=calMonth;const first=new Date(y,m,1);const startOffset=(first.getDay()+6)%7;
+  const start=new Date(y,m,1-startOffset);const cells=[];
+  for(let k=0;k<42;k++){const d=new Date(start);d.setDate(start.getDate()+k);cells.push(toISO(d))}
+  const from=cells[0],to=cells[41],map={};
+  allTasks().forEach(x=>occurrencesInRange(x.t,from,to).forEach(d=>(map[d]=map[d]||[]).push(x)));
+  const today=todayISO();
+  // vencidas se muestran en hoy
+  allTasks().forEach(x=>{if(x.t.off)return;const s=status(x.t);if(s.k==="r"&&today>=from&&today<=to){(map[today]=map[today]||[]);if(!map[today].includes(x))map[today].push(Object.assign({late:true},x))}});
+  let title=first.toLocaleDateString("es-ES",{month:"long",year:"numeric"});title=title.charAt(0).toUpperCase()+title.slice(1);
+  let h=`<div class="card"><div class="cal-h"><button class="icon-btn" id="cal-prev">‹</button><h3>${title}</h3><button class="icon-btn" id="cal-next">›</button></div>
+  <div class="cal">${["L","M","X","J","V","S","D"].map(d=>`<div class="wd">${d}</div>`).join("")}
+  ${cells.map(d=>{const items=map[d]||[];const inM=parse(d).getMonth()===m;
+    return`<button class="day${inM?"":" out"}${d===today?" today":""}${d===calSel?" sel":""}" data-day="${d}">${parse(d).getDate()}
+    ${items.length?`<span class="dots">${items.slice(0,4).map(x=>`<i class="${x.late||(d===today&&status(x.t).k==="r")?"r":""}"></i>`).join("")}</span>${items.length>4?`<span class="num">+${items.length-4}</span>`:""}`:""}</button>`}).join("")}
+  </div></div>`;
+  const sel=(map[calSel]||[]);
+  const d=parse(calSel);
+  h+=`<h2 class="sec">${d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"})} <span class="count">${sel.length}</span></h2>`;
+  h+=sel.length?`<div class="card list">${sel.map(x=>itemHTML(x)).join("")}</div>`:`<div class="card empty">Nada previsto este día.</div>`;
+  h+=`<div class="hint" style="padding:14px 4px">Las fechas se calculan desde la última vez que hiciste cada tarea. Para recibir avisos en el móvil, exporta al calendario desde Ajustes.</div>`;
+  return h;
+}
+
+function renderAjustes(){
+  const used=id=>allTasks().filter(x=>x.t.freq===id).length;
+  return`<h2 class="sec">Estancias</h2><div class="card set">
+   ${state.rooms.map((r,i)=>`<div class="set-row"><span style="font-size:20px">${esc(r.icon)}</span><div class="grow"><b>${esc(r.name)}</b><div class="hint" style="padding:0">${r.tasks.length} tareas</div></div>
+     <button class="icon-btn" data-up="${i}" ${i===0?"disabled style='opacity:.3'":""}>↑</button>
+     <button class="icon-btn" data-down="${i}" ${i===state.rooms.length-1?"disabled style='opacity:.3'":""}>↓</button>
+     <button class="icon-btn" data-editroom="${r.id}">✏️</button></div>`).join("")}
+   <div class="set-row"><button class="btn sm pri" id="add-room2">+ Nueva estancia</button></div></div>
+
+   <h2 class="sec">Periodicidades</h2><div class="card set">
+   ${state.freqs.map(f=>`<div class="set-row"><div class="grow"><b>${esc(f.name)}</b><div class="hint" style="padding:0">${f.custom?"Intervalo libre por tarea":intLabel(f.n,f.u)} · ${used(f.id)} tareas</div></div>
+     <button class="icon-btn" data-editfreq="${f.id}">✏️</button></div>`).join("")}
+   <div class="set-row"><button class="btn sm pri" id="add-freq">+ Nueva periodicidad</button></div></div>
+
+   <h2 class="sec">Avisos</h2><div class="card set">
+   <div class="set-row"><div class="grow">Mostrar como «próximas» las que vencen en</div><input type="number" id="soon" min="1" max="60" value="${state.soon}" style="width:70px"> días</div>
+   <div class="set-row"><div class="grow">Exportar al calendario (Google, Samsung…) con aviso a las 9:00</div><button class="btn sm" id="ics">📅 Exportar .ics</button></div>
+   <div class="hint">Las notificaciones push al móvil llegarán con la versión Android. Mientras tanto, el archivo .ics añade las tareas a tu calendario con su repetición; vuelve a exportarlo si cambias fechas o periodicidades.</div></div>
+
+   <h2 class="sec">Enviar configuración</h2><div class="card set">
+   <div class="set-row"><div class="grow"><b>¿Ya está todo a tu gusto?</b><div class="hint" style="padding:0">Envía tu configuración (estancias, tareas, periodicidades y fechas) por WhatsApp o email para preparar la app de Android.</div></div>
+   <button class="btn sm pri" id="share">📤 Enviar</button></div></div>
+
+   <h2 class="sec">Datos</h2><div class="card set">
+   <div class="set-row"><div class="grow">Los cambios se guardan solos en este móvil y en este navegador. Si borras los datos del navegador se pierden: haz una copia de vez en cuando.</div></div>
+   <div class="set-row"><div class="grow">Copia de seguridad</div><button class="btn sm" id="exp">Exportar</button><button class="btn sm" id="imp">Importar</button></div>
+   <div class="set-row"><div class="grow">Volver a la lista original de tareas</div><button class="btn sm danger" id="reset">Restablecer</button></div></div>
+   <div class="hint" style="padding:16px 4px">Casa al día · v1.1 (web)</div>`;
+}
+
+function render(){
+  $("#today-lbl").textContent=new Date().toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+  const over=allTasks().filter(x=>!x.t.off&&status(x.t).k==="r").length;
+  $("#nav-badge").innerHTML=over?` <span class="badge">${over}</span>`:"";
+  document.querySelectorAll("nav.bottom button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  const focusQ=document.activeElement&&document.activeElement.id==="q";
+  const pos=focusQ?document.activeElement.selectionStart:0;
+  $("#view").innerHTML=({hoy:renderHoy,estancias:renderEstancias,calendario:renderCalendario,ajustes:renderAjustes})[view]();
+  if(focusQ&&$("#q")){$("#q").focus();$("#q").setSelectionRange(pos,pos)}
+}
+
+/* ============ Eventos ============ */
+document.querySelectorAll("nav.bottom button").forEach(b=>b.onclick=()=>{view=b.dataset.v;try{history.replaceState(null,"","#"+view)}catch(e){location.hash=view}render();window.scrollTo(0,0)});
+window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(["hoy","estancias","calendario","ajustes"].includes(v)&&v!==view){view=v;render()}});
+$("#view").addEventListener("click",e=>{
+  const el=e.target.closest("[data-done],[data-edit],[data-room],[data-editroom],[data-editfreq],[data-day],[data-up],[data-down],[data-jump],button[id]");
+  if(!el)return;
+  if(el.dataset.done){markDone(el.dataset.done);return}
+  if(el.dataset.edit){openTask(el.dataset.edit);return}
+  if(el.dataset.room){roomFilter=el.dataset.room;render();return}
+  if(el.dataset.editroom){openRoom(el.dataset.editroom);return}
+  if(el.dataset.editfreq){openFreq(el.dataset.editfreq);return}
+  if(el.dataset.day){calSel=el.dataset.day;render();return}
+  if(el.dataset.jump){const t=document.getElementById(el.dataset.jump);t&&t.scrollIntoView({behavior:"smooth"});return}
+  if(el.dataset.up!==undefined||el.dataset.down!==undefined){const i=+(el.dataset.up??el.dataset.down),j=el.dataset.up!==undefined?i-1:i+1;if(j<0||j>=state.rooms.length)return;[state.rooms[i],state.rooms[j]]=[state.rooms[j],state.rooms[i]];changed();return}
+  switch(el.id){
+    case"add-task":openTask(null,roomFilter!=="all"?roomFilter:null);break;
+    case"add-room":case"add-room2":openRoom(null);break;
+    case"add-freq":openFreq(null);break;
+    case"cal-prev":calMonth.m--;if(calMonth.m<0){calMonth.m=11;calMonth.y--}render();break;
+    case"cal-next":calMonth.m++;if(calMonth.m>11){calMonth.m=0;calMonth.y++}render();break;
+    case"ics":exportICS();break;
+    case"exp":exportJSON(false);break;
+    case"share":exportJSON(true);break;
+    case"imp":importJSON();break;
+    case"reset":confirmBox("Restablecer","Se borrarán tus estancias, tareas, periodicidades e historial y se cargará la lista original.","Restablecer",()=>{state=defaults();changed()});break;
+  }
+});
+$("#view").addEventListener("change",e=>{
+  if(e.target.dataset.freq){setFreq(e.target.dataset.freq,e.target.value)}
+  if(e.target.id==="soon"){state.soon=Math.min(60,Math.max(1,parseInt(e.target.value)||7));changed()}
+});
+$("#view").addEventListener("input",e=>{if(e.target.id==="q"){query=e.target.value;render()}});
+$("#view").addEventListener("submit",e=>{
+  e.preventDefault();const form=e.target;if(!form.dataset.addto)return;
+  const name=form.n.value.trim();if(!name)return;
+  const r=state.rooms.find(x=>x.id===form.dataset.addto);
+  r.tasks.push({id:uid(),name,freq:"mes",note:"",cn:2,cu:"w",last:null,hist:[],off:false});
+  changed();toast("Añadida a "+r.name+" (mensual). Cambia la periodicidad en su columna.");
+  setTimeout(()=>{const inp=document.querySelector(`form[data-addto="${r.id}"] input`);inp&&inp.focus()},30);
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
+// Refrescar a medianoche / al volver a la pestaña
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
+
+render();
+initCloud();
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
+</script>
+</body>
+</html>
